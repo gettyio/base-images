@@ -1,5 +1,15 @@
+language: python
 services:
   - docker
+script:
+- |
+  changed=$(git diff --dirstat=files,0 HEAD~1 | awk '{ print $2 }' | grep -v circleci)
+  for dir_name in $(ls -d */ | sed s'/.$//')
+  do
+  if echo $changed | grep -w $dir_name > /dev/null; then
+      (cd $dir_name && docker build -t gettyio/$dir_name . && docker push gettyio/$dir_name)
+  fi
+  done
 deploy:
   provider: script
   script: bash ci-deploy
