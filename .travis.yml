@@ -3,7 +3,8 @@ services:
 jobs:
   include:
   - stage: deploy
-    script: |
+    script:
+    - |
       echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
       changed=$(git diff --dirstat=files,0 HEAD~1 | awk '{ print $2 }' | grep -v circleci)
       for dir_name in $(ls -d */ | sed s'/.$//')
