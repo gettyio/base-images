@@ -1,15 +1,10 @@
 services:
   - docker
-script:
-  - |
-    echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-    changed=$(git diff --dirstat=files,0 HEAD~1 | awk '{ print $2 }' | grep -v circleci)
-    for dir_name in $(ls -d */ | sed s'/.$//')
-    do
-      if echo $changed | grep -w $dir_name > /dev/null; then
-        (cd $dir_name && docker build -t gettyio/$dir_name . && docker push gettyio/$dir_name)
-      fi
-    done
+deploy:
+  provider: script
+  script: bash ci-deploy
+  on:
+    branch: master
 notifications:
   slack:
     secure: E4Ecpe1Y+uq7Mh2i9LEbdkq5Xr/lB9jL6FhuXfRZ3vHGv6wbD9J06KjAEut7K+LKyze6pT3HgencOF5AXCcD9SX9dxYlNCH690L3A/YKepFbcjW7gxNbtJaJduvcO5WrVJdjzTDJvFzqw+Et6iaCZde722lB/sSNA4D+X0FQjSb8Jb8LWoAhDElxYVFwPYfAhgqbjMuLCXGsxsVVCXgt54CSVAnHhRLxcgEsyoVZWUs8FDK7UyC24e6rt/TTFlwf6w5uXB7AmzHdfOwypvg3gLiXdlUeHksiWqtnE0/8Zbrctoo1mxAVGMN140fjzOcHUuWvNyOepjjvA5EIpd+kIJSZjIDD+0n0cbxraBRwn5QfBkngLoizR1ODSP+dlLwTSgx8i05uhdwQzib8m+Q35QE/OJwPrMzp6Azw6ZCjfqvLZQQmjksMTS10P3Ae9MtwzOvJYDllVTx4t3j0HMPfKCrQNBDduQ7WGnCS5JQJELZPFUB6H5661QvFb+8WovE8KwMGle/e5D0RuVJAz/ZrROkdRtpbbMurZOhzpaoaLfY4p2Pn19qYwZOCv+pX+alW8WYwdqzgWcYWvRAR6tmvVH8uBpi4Mef3L3mlV+PfSEwZKSvwzhU+jYQ20AZswSu/5aozS87eTn9YetvCYuQmTqlceP9EeDZPzB//t0dKB3k=
