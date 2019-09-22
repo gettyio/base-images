@@ -1,0 +1,24 @@
+services:
+- docker
+
+jobs:
+  include:
+  - stage: deploy
+    script: |
+      echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+      changed=$(git diff --dirstat=files,0 HEAD~1 | awk '{ print $2 }' | grep -v circleci)
+      for dir_name in $(ls -d */ | sed s'/.$//')
+      do
+        if echo $changed | grep -w $dir_name > /dev/null; then
+          (cd $dir_name && docker build -t gettyio/$dir_name . && docker push gettyio/$dir_name)
+        fi
+      done
+
+notifications:
+  slack:
+    secure: E4Ecpe1Y+uq7Mh2i9LEbdkq5Xr/lB9jL6FhuXfRZ3vHGv6wbD9J06KjAEut7K+LKyze6pT3HgencOF5AXCcD9SX9dxYlNCH690L3A/YKepFbcjW7gxNbtJaJduvcO5WrVJdjzTDJvFzqw+Et6iaCZde722lB/sSNA4D+X0FQjSb8Jb8LWoAhDElxYVFwPYfAhgqbjMuLCXGsxsVVCXgt54CSVAnHhRLxcgEsyoVZWUs8FDK7UyC24e6rt/TTFlwf6w5uXB7AmzHdfOwypvg3gLiXdlUeHksiWqtnE0/8Zbrctoo1mxAVGMN140fjzOcHUuWvNyOepjjvA5EIpd+kIJSZjIDD+0n0cbxraBRwn5QfBkngLoizR1ODSP+dlLwTSgx8i05uhdwQzib8m+Q35QE/OJwPrMzp6Azw6ZCjfqvLZQQmjksMTS10P3Ae9MtwzOvJYDllVTx4t3j0HMPfKCrQNBDduQ7WGnCS5JQJELZPFUB6H5661QvFb+8WovE8KwMGle/e5D0RuVJAz/ZrROkdRtpbbMurZOhzpaoaLfY4p2Pn19qYwZOCv+pX+alW8WYwdqzgWcYWvRAR6tmvVH8uBpi4Mef3L3mlV+PfSEwZKSvwzhU+jYQ20AZswSu/5aozS87eTn9YetvCYuQmTqlceP9EeDZPzB//t0dKB3k=
+
+env:
+  global:
+  - secure: R2bI2rGl4p8uUWhJ8iUrPs2e5t8l7qfdZ1pjFPlXi4D2k1lnAnp/s0u0CHeAdRmsjGiAcL+ZG6GK2dGDTWYXr612Jyl+FKVCUWg74EAK54XJ7ZGVTDiwb75BLuzWitE0BypbB4F9iBFlnds3b7uOGyxqhWIQZsoCedFItXMgRonXnm9NRI03zj41e9qopQAZttkEJJv1u57cIpZk7p5RvIDU6LSfKhYH9bkM+fDZZoVUtCv6B8yiADTRkDWjGIR6u9+OqBTcswCPBLRqUWN6ko6LasAFe9Vu21jDFGqVJzpgRa7WY7bLmcY9q5TD3WLBifsSGTW0yFS1D3nSYNs7CpifumeCoGLBuA5ES1WHYevL7bPE80ptHfk30JftxUkEYWagqm/+ehu9T4B4E3QjXZglHRwPkX+L10dez4HThZ9GPCOKA0W330DuXxawsuo3uzleVLDZU0nAIZfovHb7oDKjARl3XON+Iq/bKMvMa0iAHNiL6eDeZiiNNNyD3JMowuCf9l5Px/LZrCFBCr1O0XDPIMP/rXbBripS8YLZwawYro1LYw3juQaPm4DaSJnNosuHCtVeRItpaTp2DmBtctClmIsI9lKJ6iFavUtY+YVcqHTgGEetL3NrID46eghtbiwrWjruZv3fZJWfzsqiFGuBkTd6T4FyT1TlTxgc3m4=
+  - secure: WI12iu9bOFJOgbcM9bFPE1HqnWkxfG/+Z9tnECjbHtAttKpnNN5RXTRwgJe+9O/gnnOkcOr1n/v30ALzi4GDrh4vPWb9Ao+5oC89ImUraVKJfIEbI5+jDsWLb7/9l0aDWXsrE7IK9RcMlgoQ3K/sTeeTFRbW3GcHzqK+EgQvlrfALaj1GMB19C0v/X0exKh9DINp0PavDYXVqJo0RmEGefcynnLq+fp04JiUxjjhkOpjUQEQfNjMj8TZ39IYWhsIZ46jsVzpBEALRSe6mmlvKGyJvIgOA1wcoFOzfztqEs6pZrvQT+cx8Ak18xIXHNy42N4B6W64UT8d1O2hInb6RyCMaDrQd8gUc4a2IKmxVIhB+lG9pb6J+9aRQObY+4aIUMWPbPz83zoj3pIiM9xFE/ahLKoxcmPKHHtLLsTwCcy7RdnvjH5+uJUl1QN6w7m4z94cmlmggp3RInZk4IYkVIwer7Jkpjqo4uxghb6/NJPxSDWtP4Q8HBkw2XAw+wCjtfOK0fIu9RqHTTdYpNti6I/K6k0nK/+ZIEJ+x1+ncVeMFtYiurbNt0otq+Fc3M6ywEnLwJ3s9kbKMq2qSXQTLNY+JN6Y/PJgYAr5yhFjrTcgD3hjBCshYEhOZy/TKM26VL0slcedB12D3qmGWQfX6sqFgySJ6Btp3FEG2oTOsjc=
