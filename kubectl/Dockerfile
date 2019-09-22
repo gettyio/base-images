@@ -2,7 +2,7 @@ FROM alpine:3.10
 
 RUN apk update \
     && apk -U upgrade \
-    && apk add --no-cache curl ca-certificates \
+    && apk add --no-cache curl gettext ca-certificates \
     && update-ca-certificates --fresh \
     && rm -rf /var/cache/apk/*
 
